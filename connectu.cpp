@@ -27,7 +27,7 @@ using namespace std;
 
 struct Post {
     int postId; // heyyyyy
-    int userId;
+    int userId; // is this here
     string content;
     int likes;
     long timestamp;
