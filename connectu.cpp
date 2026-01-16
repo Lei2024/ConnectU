@@ -26,7 +26,7 @@ using namespace std;
 // ==========================================
 
 struct Post {
-    int postId;
+    int postId; // heyyyyy
     int userId;
     string content;
     int likes;
