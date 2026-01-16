@@ -29,7 +29,7 @@ struct Post {
     int postId; // heyyyyy
     int userId; // is this here
     string content; // hi again
-    int likes;
+    int likes; // heyyyy
     long timestamp;
     Post* next; 
 
