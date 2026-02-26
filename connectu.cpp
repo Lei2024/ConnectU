@@ -51,8 +51,12 @@ public:
     // Task: Add a new post to the FRONT of the list (O(1))
     void addPost(int pid, int uid, string content, int likes, long time) {
         // TODO: LAB 1
+        // Create a new Post object using new
+        Post* newPost = new Post(pid, uid, content, likes, time);
 
-
+        // Insert node(post) to the linked list (ensure O(1) time)
+        newPost->next = head;
+        head = newPost;
     }
 
     void printTimeline() {
@@ -61,9 +65,18 @@ public:
         
         // Task: Traverse the linked list and print content
         // TODO: LAB 1
+        while (current != nullptr) {
+            cout << "PID: " << current->postId << ", ";
+            cout << "UID: " << current->userId << ", ";
+            cout << "Content: " << current->content << ", ";
+            cout << "Likes: " << current->likes << ", ";
+            cout << "Time: " << current->timestamp;
+            cout << "\n";
+            current = current->next;
+        }
 
     }
-};
+}; 
 
 // Forward Declaration
 class User;
@@ -159,8 +172,16 @@ private:
     HashNode** table;
 
     unsigned long hashFunction(string key) {
-        // TODO: LAB 2
-        return 0; 
+        // TODO: LAB 2 - convert string username into an int index using Polynomial Rolling Hash
+        int p = 31;             // base prime
+        int m = 1e9 + 9;        // large prime modulus
+        long long hashValue = 0;
+        long long powerOfP = 1;
+        for (char c : key) {
+            hashValue = (hashValue + (int)c * powerOfP) % m;
+            powerOfP = (powerOfP * p) % m;
+        }
+        return hashValue % TABLE_SIZE; 
     }
 
 public:
@@ -169,15 +190,33 @@ public:
         for (int i = 0; i < TABLE_SIZE; i++) table[i] = nullptr;
     }
 
-    void put(string key, User* user) { /* TODO: LAB 2 */ }
+    void put(string key, User* user) { 
+        // TODO: LAB 2 - Store user in table array at correct index
+        int index = hashFunction(key);          
+
+        HashNode* newNode = new HashNode(key, user);    
+
+        // Insert user at beginning of linked list to avoid collisions (Chaining)
+        newNode->next = table[index];
+        table[index] = newNode;
+    }
 
     User* get(string key) {
-        // --- TEMPORARY FALLBACK FOR LAB 1 ---
-        for(User* u : allUsers) {
-            if (u->username == key) return u;
-        }
+ 
         // TODO: LAB 2 - REPLACE ABOVE WITH HASH LOOKUP
-        return nullptr;
+        int index = hashFunction(key);   // Use hashFunction to find the index directly
+
+        HashNode* current = table[index];
+
+        // Walk the linked list (if there are collisions) to return the correct user
+        while (current != nullptr) {
+            if (current->key == key) {
+                return current->value;  // user found
+            }
+            current = current->next;
+        }
+
+        return nullptr;     // user not found
     }
 };
 
