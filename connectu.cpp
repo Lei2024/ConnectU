@@ -38,7 +38,10 @@ struct Post {
         
     // TODO: LAB 3 - Implement Scoring Logic
     double getScore() {
-        return 0.0; 
+        long present = time(0);                     // current time
+        double hoursOld = (present - timestamp) / 3600.0;  
+        double score = (likes * 10) + (1000 / (hoursOld + 1));
+        return score;
     }
 };
 
@@ -133,11 +136,34 @@ public:
 
 // BST Implementation
 BSTNode* FriendBST::insert(BSTNode* node, User* u) {
-    // TODO: LAB 4
+    // base case: friend list is empty
+    if (node == NULL) {
+        return new BSTNode(u);
+    }
+
+    // Compare users to sort in alphabetical order
+    if (u->username < node->user->username) {
+        node->left = insert(node->left, u);
+    } else {
+        node->right = insert(node->right, u);
+    }
+
     return node;
 }
 void FriendBST::printInOrder(BSTNode* node) {
-    // TODO: LAB 4
+    // base case: no friends
+    if (node == NULL) {
+        return;
+    }
+
+    // traverse the left subtree
+    printInOrder(node->left);
+
+    // visit node and print username
+    cout << "@" << node->user->username << endl;
+
+    // traverse the right subtree
+    printInOrder(node->right);
 }
 
 // TODO: LAB 3 - Max Heap
@@ -146,13 +172,70 @@ private:
     Post* heap[1000]; 
     int size;
 
-    void heapifyDown(int index) { /* TODO: LAB 3 */ }
-    void heapifyUp(int index) { /* TODO: LAB 3 */ }
 
+    void heapifyUp(int index) {
+
+        while (index > 0) {
+            int parent = (index - 1) / 2;
+            if (heap[index]->getScore() > heap[parent]->getScore()) {
+                Post* temp = heap[index];
+                heap[index] = heap[parent];
+                heap[parent] = temp;
+                index = parent;
+            }
+            else {
+                break;
+            }
+        }
+    }   
+
+    void heapifyDown(int index) {
+
+        while (true) {
+
+            int left = 2 * index + 1;
+            int right = 2 * index + 2;
+            int biggest = index;
+
+            if (left < size && heap[left]->getScore() > heap[biggest]->getScore()) {
+                biggest = left;
+            }
+            if (right < size && heap[right]->getScore() > heap[biggest]->getScore()) {
+                biggest = right;
+            }
+
+            if (biggest != index) {
+                Post* temp = heap[index];
+                heap[index] = heap[biggest];
+                heap[biggest] = temp;
+                index = biggest;
+            }
+            else {
+                break;
+            }
+        }
+}
 public:
     FeedHeap() : size(0) {}
-    void push(Post* p) { /* TODO: LAB 3 */ }
-    Post* popMax() { return nullptr; /* TODO: LAB 3 */ }
+    void push(Post* p) {
+        heap[size] = p;
+        heapifyUp(size);
+        size++;
+    }
+
+    Post* popMax() { 
+        if (size == 0) {
+            return nullptr;
+        }
+
+        Post* top = heap[0];
+        heap[0] = heap[size - 1];
+        size--;
+
+        heapifyDown(0);
+
+        return top;
+    }
     bool isEmpty() { return size == 0; }
 };
 
@@ -290,7 +373,6 @@ void recommendFriends(User* startUser) {
     cout << "\n[GRAPH ANALYSIS] Finding friends of friends..." << endl;
     // TODO: LAB 5
 }
-
 // ==========================================
 // FILE I/O 
 // ==========================================
