@@ -372,6 +372,45 @@ void addFriendship(User* requester, User* target) {
 void recommendFriends(User* startUser) {
     cout << "\n[GRAPH ANALYSIS] Finding friends of friends..." << endl;
     // TODO: LAB 5
+    queue<User*> queue;    // add direct friends to this 
+    set<int> visited;       // keeps track of friends visited
+    set<int> directFriends; // keeps track of which users are direct friends
+
+    // considered myself as visited
+    visited.insert(startUser->userId);
+
+    // add direct friends to queue
+    for (User* f : startUser->friends) {
+        queue.push(f);
+        visited.insert(f->userId);
+        directFriends.insert(f->userId);
+    }
+
+    bool found = false; // indicates if friend recommendations are found through BFS
+
+    // use BFS method to find friends of a friend
+    while (!queue.empty()) {
+        User* current = queue.front();
+        queue.pop();
+
+        // view your friend's friends
+        for (User* neighbor : current->friends) {
+            if (visited.count(neighbor->userId)) {
+                continue;
+            }
+            visited.insert(neighbor->userId);   // if visited, skip
+
+            // verify that the friend isn't yourself and a direct friend
+            if (neighbor->userId != startUser->userId && !directFriends.count(neighbor->userId)) {
+                cout << " @" << neighbor->username << endl;
+                found = true;
+            }
+        }
+    }
+
+    if (!found) {
+        cout << " No friend recommendations found." << endl;
+    }
 }
 // ==========================================
 // FILE I/O 
